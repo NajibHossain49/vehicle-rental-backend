@@ -3,6 +3,14 @@ import type { Knex } from 'knex';
 
 dotenv.config();
 
+function envInt(name: string, fallback: number): number {
+  const parsed = Number(process.env[name]);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+const poolMin = envInt('DB_POOL_MIN', 2);
+const poolMax = Math.max(poolMin, envInt('DB_POOL_MAX', 10));
+
 const connection: Knex.PgConnectionConfig = {
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT) || 5432,
@@ -14,6 +22,10 @@ const connection: Knex.PgConnectionConfig = {
 const sharedConfig: Knex.Config = {
   client: 'pg',
   connection,
+  pool: {
+    min: poolMin,
+    max: poolMax,
+  },
   migrations: {
     directory: './src/db/migrations',
     extension: 'ts',
@@ -34,10 +46,6 @@ const config: { [key: string]: Knex.Config } = {
   },
   production: {
     ...sharedConfig,
-    pool: {
-      min: 2,
-      max: 10,
-    },
   },
 };
 

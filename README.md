@@ -50,6 +50,8 @@ cp .env.example .env
 | `DB_USER` | Database user | `postgres` |
 | `DB_PASSWORD` | Database password | `postgres` |
 | `DB_NAME` | Database name | `vehicle_rental` |
+| `DB_POOL_MIN` | Knex pool minimum connections | `2` |
+| `DB_POOL_MAX` | Knex pool maximum connections | `10` |
 | `JWT_SECRET` | Secret used to sign tokens | long random string |
 | `JWT_EXPIRES_IN` | Token lifetime | `1d` |
 | `UPLOAD_PATH` | Local folder for vehicle photos | `./uploads` |
@@ -81,6 +83,12 @@ Production:
 ```bash
 npm run build
 npm start
+```
+
+Lint:
+
+```bash
+npm run lint
 ```
 
 The API listens on `http://localhost:3000` by default. Uploaded images are served from `/uploads/<filename>`.
