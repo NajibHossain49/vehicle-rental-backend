@@ -63,12 +63,12 @@ npm run migrate:latest
 npm run seed:run
 ```
 
-Seeded staff login:
+Seeded staff login (password for both: `Password123!`):
 
-- **Email:** `admin@rental.com`
-- **Password:** `Password123!`
+- `admin@rental.com`
+- `manager@rental.com`
 
-The seed also inserts two vehicles and three rentals, including one booking that crosses a month boundary (`2026-07-28` to `2026-08-03`) so the monthly report can be tested.
+The seed inserts 6 vehicles (one soft-deleted), 13 rentals across all statuses, and a month-boundary booking (`2026-07-28` to `2026-08-03`). Full table: [docs/API.md](./docs/API.md#10-seed-data).
 
 ## Run the server
 

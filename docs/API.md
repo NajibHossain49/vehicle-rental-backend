@@ -561,27 +561,42 @@ Create and update run this check in a transaction. Create also uses `SELECT … 
 
 After `npm run seed:run`:
 
-**Staff**
+**Staff** (password for both: `Password123!`)
 
-| Email | Password |
+| Email | Name |
 |---|---|
-| `admin@rental.com` | `Password123!` |
+| `admin@rental.com` | Admin User |
+| `manager@rental.com` | Fleet Manager |
 
 **Vehicles**
 
-| ID | Name | Plate | Rate |
-|---|---|---|---|
-| 1 | Toyota Camry | `ABC-1234` | 45.00 |
-| 2 | Honda CR-V | `XYZ-5678` | 65.00 |
+| ID | Name | Plate | Category | Rate | Notes |
+|---|---|---|---|---|---|
+| 1 | Toyota Camry | `ABC-1234` | sedan | 45.00 | |
+| 2 | Honda CR-V | `XYZ-5678` | suv | 65.00 | |
+| 3 | Nissan Sunny | `DHA-2291` | sedan | 38.00 | |
+| 4 | Yamaha FZ-X | `CTG-7744` | bike | 22.50 | |
+| 5 | Toyota Hiace | `KHL-1102` | van | 90.00 | |
+| 6 | Suzuki Alto | `RAJ-3001` | sedan | 25.00 | Soft-deleted (hidden from `GET /vehicles`) |
 
 **Rentals**
 
-| ID | Vehicle | Customer | Dates | Status |
-|---|---|---|---|---|
-| 1 | Camry | John Doe | 2026-07-28 → 2026-08-03 | completed |
-| 2 | CR-V | Jane Smith | 2026-08-18 → 2026-08-22 | ongoing |
-| 3 | Camry | Robert Chen | 2026-08-25 → 2026-08-27 | booked |
+| ID | Vehicle | Customer | Dates | Amount | Status |
+|---|---|---|---|---|---|
+| 1 | Camry | John Doe | 2026-07-28 → 2026-08-03 | 315.00 | completed (month boundary) |
+| 2 | Camry | Laila Rahman | 2026-06-01 → 2026-06-03 | 135.00 | completed |
+| 3 | Camry | Robert Chen | 2026-08-25 → 2026-08-27 | 135.00 | booked |
+| 4 | Camry | Arif Khan | 2026-08-10 → 2026-08-11 | 90.00 | cancelled |
+| 5 | CR-V | Jane Smith | 2026-08-18 → 2026-08-22 | 325.00 | ongoing |
+| 6 | CR-V | Imran Hossain | 2026-07-05 → 2026-07-07 | 195.00 | completed |
+| 7 | CR-V | Nadia Akter | 2026-09-01 → 2026-09-03 | 195.00 | booked |
+| 8 | Sunny | Farhan Ahmed | 2026-09-01 → 2026-09-04 | 152.00 | booked |
+| 9 | Sunny | Nabila Chowdhury | 2026-07-10 → 2026-07-12 | 114.00 | completed |
+| 10 | Yamaha | Tahmid Hasan | 2026-08-08 → 2026-08-09 | 45.00 | completed |
+| 11 | Yamaha | Rafiul Islam | 2026-09-20 → 2026-09-21 | 45.00 | booked |
+| 12 | Hiace | Bengal Tours Ltd | 2026-08-01 → 2026-08-05 | 450.00 | completed |
+| 13 | Hiace | Summit Logistics | 2026-09-15 → 2026-09-18 | 360.00 | booked |
 
-Camry is free in the Aug 4–17 gap and after Aug 27. CR-V is busy Aug 18–22.
+Active bookings that block new ones: Camry Aug 25–27, CR-V Aug 18–22, CR-V Sep 1–3, Sunny Sep 1–4, Yamaha Sep 20–21, Hiace Sep 15–18. Cancelled and completed do not block. August report should list Hiace as `highest_revenue_vehicle` (450).
 
 For a ready-made request set, import [Postman_Collection/Vehicle-Rental-API.postman_collection.json](../Postman_Collection/Vehicle-Rental-API.postman_collection.json). Run **Auth → Login (success)** first so the collection stores `token`.
