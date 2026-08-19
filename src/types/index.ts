@@ -20,6 +20,27 @@ export interface VehicleRequestBody {
   photo_path?: string | null;
 }
 
+export type UpdateVehicleRequestBody = Partial<VehicleRequestBody>;
+
+export interface Vehicle {
+  id: number;
+  name: string;
+  plate_number: string;
+  category: string;
+  daily_rate: string | number;
+  photo_path: string | null;
+  deleted_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface VehicleListQuery {
+  page?: number;
+  limit?: number;
+  category?: string;
+  search?: string;
+}
+
 export interface RentalRequestBody {
   vehicle_id: number;
   customer_name: string;
