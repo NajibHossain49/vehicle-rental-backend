@@ -4,7 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "TS_NODE_TRANSPILE_ONLY=true ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "migrate:latest": "TS_NODE_TRANSPILE_ONLY=true knex migrate:latest --knexfile knexfile.ts",
+    "migrate:rollback": "TS_NODE_TRANSPILE_ONLY=true knex migrate:rollback --knexfile knexfile.ts",
+    "migrate:status": "TS_NODE_TRANSPILE_ONLY=true knex migrate:status --knexfile knexfile.ts",
+    "seed:run": "TS_NODE_TRANSPILE_ONLY=true knex seed:run --knexfile knexfile.ts"
   },
   "keywords": [],
   "author": "",
