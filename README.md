@@ -95,6 +95,8 @@ The API listens on `http://localhost:3000` by default. Uploaded images are serve
 
 ## API Documentation
 
+Full request/response reference, status codes, and examples: **[docs/API.md](./docs/API.md)**.
+
 All routes except `POST /auth/login` require:
 
 ```http
@@ -197,3 +199,11 @@ This is why the seed includes a rental from **2026-07-28 to 2026-08-03**:
 |---|---|---|
 | 2026-07 | Jul 28–31 (4 days) | 180.00 |
 | 2026-08 | Aug 1–3 (3 days) | 135.00 |
+
+## Documentation status
+
+| Document | Status | Notes |
+|---|---|---|
+| [docs/API.md](./docs/API.md) | Complete | Full API reference: auth, vehicles, rentals, reports, errors, overlap, and seed data |
+| [README.md](./README.md) | Complete | Setup, env, migrate/seed, and run instructions |
+| [Postman collection](./Postman_Collection/Vehicle-Rental-API.postman_collection.json) | Ready | Import into Postman; run Login first to save `token` |
