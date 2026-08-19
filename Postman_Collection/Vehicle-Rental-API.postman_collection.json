@@ -1,0 +1,490 @@
+{
+  "info": {
+    "_postman_id": "7c4e9a12-3b8f-4d21-9a6e-vehicle-rental-api",
+    "name": "Vehicle Rental Management API",
+    "description": "Import this collection, then run **Auth → Login (success)** first so `token` is saved automatically.\n\nExample payloads use **new** vehicles, customers, and dates — not the seed records (Toyota Camry / Honda CR-V / John Doe / Jane Smith / Robert Chen).\n\nSuggested order:\n1. Login\n2. Create Vehicle (saves `vehicleId`)\n3. Create Rental on new vehicle (saves `rentalId`)\n4. Overlap 409 request (uses seeded Camry on purpose)\n5. Reports",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "vehicleId",
+      "value": "3"
+    },
+    {
+      "key": "rentalId",
+      "value": "4"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (success)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.token) {",
+                  "  pm.collectionVariables.set('token', body.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@rental.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Only staff user in the seed. Token is stored in the collection `token` variable."
+          }
+        },
+        {
+          "name": "Login (invalid password)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@rental.com\",\n  \"password\": \"WrongPass999\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Expect 401 Invalid email or password."
+          }
+        },
+        {
+          "name": "Login (validation error)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-an-email\",\n  \"password\": \"\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Expect 400 validation failed."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "List vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List vehicles (search + category)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/vehicles?page=1&limit=10&category=sedan&search=Nissan",
+              "host": ["{{baseUrl}}"],
+              "path": ["vehicles"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "category", "value": "sedan" },
+                { "key": "search", "value": "Nissan" }
+              ]
+            },
+            "description": "Filters are for the new Nissan example, not the seeded Camry/CR-V."
+          }
+        },
+        {
+          "name": "Get vehicle by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}",
+            "description": "Uses `vehicleId` from Create Vehicle. Run create first."
+          }
+        },
+        {
+          "name": "Create vehicle (Nissan Sunny)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Vehicle created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "  pm.collectionVariables.set('vehicleId', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Nissan Sunny", "type": "text" },
+                { "key": "plate_number", "value": "DHA-2291", "type": "text" },
+                { "key": "category", "value": "sedan", "type": "text" },
+                { "key": "daily_rate", "value": "38", "type": "text" },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": [],
+                  "description": "Optional. Attach a JPEG/PNG/WebP under 5MB if you want to test upload."
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/vehicles",
+            "description": "New vehicle (not in seed). Plate DHA-2291 is unique. Saves `vehicleId`."
+          }
+        },
+        {
+          "name": "Create vehicle (Yamaha FZ-X)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Yamaha FZ-X", "type": "text" },
+                { "key": "plate_number", "value": "CTG-7744", "type": "text" },
+                { "key": "category", "value": "bike", "type": "text" },
+                { "key": "daily_rate", "value": "22.50", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/vehicles",
+            "description": "Second new vehicle. Does not overwrite `vehicleId`."
+          }
+        },
+        {
+          "name": "Create vehicle (duplicate plate)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Fake Camry", "type": "text" },
+                { "key": "plate_number", "value": "ABC-1234", "type": "text" },
+                { "key": "category", "value": "sedan", "type": "text" },
+                { "key": "daily_rate", "value": "40", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/vehicles",
+            "description": "Uses seeded plate ABC-1234 on purpose. Expect 409."
+          }
+        },
+        {
+          "name": "Update vehicle",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Nissan Sunny N17", "type": "text" },
+                { "key": "daily_rate", "value": "42", "type": "text" },
+                { "key": "category", "value": "sedan", "type": "text" }
+              ]
+            },
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}",
+            "description": "Updates the Nissan created above. Photo is optional."
+          }
+        },
+        {
+          "name": "Soft delete vehicle",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/vehicles/{{vehicleId}}",
+            "description": "Soft-deletes the Nissan. Run this last among vehicle writes, or recreate the vehicle afterward."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rentals",
+      "item": [
+        {
+          "name": "List rentals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rentals?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["rentals"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List rentals (filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rentals?page=1&limit=10&status=booked&start_date=2026-09-01&end_date=2026-09-30",
+              "host": ["{{baseUrl}}"],
+              "path": ["rentals"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "booked" },
+                { "key": "start_date", "value": "2026-09-01" },
+                { "key": "end_date", "value": "2026-09-30" }
+              ]
+            },
+            "description": "Looks at September bookings (new examples), not the seeded August rentals."
+          }
+        },
+        {
+          "name": "Get rental by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/rentals/{{rentalId}}",
+            "description": "Uses `rentalId` from Create rental (Farhan). Includes vehicle details."
+          }
+        },
+        {
+          "name": "Create rental (new Nissan, Sep 1-4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rental created', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "  pm.collectionVariables.set('rentalId', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_id\": {{vehicleId}},\n  \"customer_name\": \"Farhan Ahmed\",\n  \"customer_phone\": \"+8801711002200\",\n  \"start_date\": \"2026-09-01\",\n  \"end_date\": \"2026-09-04\"\n}"
+            },
+            "url": "{{baseUrl}}/rentals",
+            "description": "Book the newly created Nissan (not a seed vehicle). Customer is new. Dates are in September so they do not collide with seed rentals. Server calculates total_amount (4 days). Saves `rentalId`."
+          }
+        },
+        {
+          "name": "Create rental (Camry free gap, Aug 10-12)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_id\": 1,\n  \"customer_name\": \"Nabila Chowdhury\",\n  \"customer_phone\": \"+8801912334455\",\n  \"start_date\": \"2026-08-10\",\n  \"end_date\": \"2026-08-12\",\n  \"status\": \"booked\"\n}"
+            },
+            "url": "{{baseUrl}}/rentals",
+            "description": "Seeded Camry (id 1) is busy Jul 28–Aug 3 and Aug 25–27. Aug 10–12 is a free gap, so this should succeed."
+          }
+        },
+        {
+          "name": "Create rental (overlap 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_id\": 1,\n  \"customer_name\": \"Tahmid Hasan\",\n  \"customer_phone\": \"+8801555667788\",\n  \"start_date\": \"2026-08-26\",\n  \"end_date\": \"2026-08-28\"\n}"
+            },
+            "url": "{{baseUrl}}/rentals",
+            "description": "Intentionally overlaps seeded Camry booking Aug 25–27 (Robert Chen). Expect 409."
+          }
+        },
+        {
+          "name": "Create rental (validation error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vehicle_id\": 1,\n  \"customer_name\": \"Bad Dates\",\n  \"customer_phone\": \"+8801700000000\",\n  \"start_date\": \"2026-09-20\",\n  \"end_date\": \"2026-09-15\"\n}"
+            },
+            "url": "{{baseUrl}}/rentals",
+            "description": "end_date before start_date. Expect 400."
+          }
+        },
+        {
+          "name": "Update rental",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_phone\": \"+8801711998877\",\n  \"end_date\": \"2026-09-05\",\n  \"status\": \"ongoing\"\n}"
+            },
+            "url": "{{baseUrl}}/rentals/{{rentalId}}",
+            "description": "Extends Farhan's Nissan booking to Sep 5 and marks it ongoing. Total is recalculated server-side."
+          }
+        },
+        {
+          "name": "Cancel rental",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/rentals/{{rentalId}}",
+            "description": "Sets status to cancelled. Run after you are done testing Get/Update on this rental."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Monthly report (August 2026)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/rentals?month=2026-08",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "rentals"],
+              "query": [
+                { "key": "month", "value": "2026-08" }
+              ]
+            },
+            "description": "Seed cross-month rental (Jul 28–Aug 3) counts only Aug 1–3 here. CR-V should be highest_revenue_vehicle from seed unless you added more August rentals."
+          }
+        },
+        {
+          "name": "Monthly report (July 2026)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/rentals?month=2026-07",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "rentals"],
+              "query": [
+                { "key": "month", "value": "2026-07" }
+              ]
+            },
+            "description": "Same cross-month rental counts Jul 28–31 (4 days) in July."
+          }
+        },
+        {
+          "name": "Monthly report (September + new Nissan)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/rentals?month=2026-09&vehicle_id={{vehicleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "rentals"],
+              "query": [
+                { "key": "month", "value": "2026-09" },
+                { "key": "vehicle_id", "value": "{{vehicleId}}" }
+              ]
+            },
+            "description": "After creating Farhan's September rental on the Nissan. Filtered by the new vehicle."
+          }
+        },
+        {
+          "name": "Monthly report (current month default)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reports/rentals",
+            "description": "Omits `month`; API defaults to the current calendar month."
+          }
+        },
+        {
+          "name": "Monthly report (invalid month)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/rentals?month=2026-13",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "rentals"],
+              "query": [
+                { "key": "month", "value": "2026-13" }
+              ]
+            },
+            "description": "Expect 400 — month must be YYYY-MM."
+          }
+        }
+      ]
+    }
+  ]
+}
