@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { uploadDir } from './middlewares/upload.middleware';
 import authRoutes from './routes/auth.routes';
+import rentalRoutes from './routes/rental.routes';
+import reportRoutes from './routes/report.routes';
 import vehicleRoutes from './routes/vehicle.routes';
 
 dotenv.config();
@@ -15,6 +17,8 @@ app.use('/uploads', express.static(uploadDir));
 
 app.use('/auth', authRoutes);
 app.use('/vehicles', vehicleRoutes);
+app.use('/rentals', rentalRoutes);
+app.use('/reports', reportRoutes);
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const statusCode = (err as Error & { statusCode?: number }).statusCode ?? 500;
