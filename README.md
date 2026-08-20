@@ -35,7 +35,7 @@ npm install
 
 ### 3. Configure environment
 
-Copy `.env.example` to `.env` and fill in the values:
+Copy `.env.example` to `.env` and fill in the values. The app reads them through `src/config/env.ts` (required variables are validated at startup):
 
 ```bash
 cp .env.example .env

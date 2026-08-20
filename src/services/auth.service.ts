@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt, { type SignOptions } from 'jsonwebtoken';
+import { env } from '../config/env';
 import db from '../db';
 import type { AuthUser, Staff } from '../types';
 
@@ -21,17 +22,12 @@ export const authService = {
       return null;
     }
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error('JWT_SECRET is not configured');
-    }
-
     const payload: AuthUser = { id: staff.id, email: staff.email };
     const options: SignOptions = {
-      expiresIn: (process.env.JWT_EXPIRES_IN ?? '1d') as SignOptions['expiresIn'],
+      expiresIn: env.jwt.expiresIn as SignOptions['expiresIn'],
     };
 
-    const token = jwt.sign(payload, secret, options);
+    const token = jwt.sign(payload, env.jwt.secret, options);
 
     return {
       token,

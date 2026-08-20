@@ -1,13 +1,10 @@
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
-import { uploadDir } from './middlewares/upload.middleware';
+import { uploadDir } from './config/env';
 import authRoutes from './routes/auth.routes';
 import rentalRoutes from './routes/rental.routes';
 import reportRoutes from './routes/report.routes';
 import vehicleRoutes from './routes/vehicle.routes';
-
-dotenv.config();
 
 const app = express();
 

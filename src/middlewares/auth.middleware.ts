@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 import type { AuthUser } from '../types';
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
@@ -11,15 +12,9 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 
   const token = header.slice('Bearer '.length).trim();
-  const secret = process.env.JWT_SECRET;
-
-  if (!secret) {
-    res.status(500).json({ message: 'JWT_SECRET is not configured' });
-    return;
-  }
 
   try {
-    const decoded = jwt.verify(token, secret) as AuthUser;
+    const decoded = jwt.verify(token, env.jwt.secret) as AuthUser;
 
     if (typeof decoded.id !== 'number' || typeof decoded.email !== 'string') {
       res.status(401).json({ message: 'Invalid or expired token' });

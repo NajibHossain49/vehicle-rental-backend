@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import multer, { MulterError } from 'multer';
 import path from 'path';
+import { uploadDir } from '../config/env';
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME_TYPES: Record<string, string> = {
@@ -10,8 +11,6 @@ const ALLOWED_MIME_TYPES: Record<string, string> = {
   'image/png': '.png',
   'image/webp': '.webp',
 };
-
-export const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_PATH || 'uploads');
 
 fs.mkdirSync(uploadDir, { recursive: true });
 
