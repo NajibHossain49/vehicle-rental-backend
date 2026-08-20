@@ -21,19 +21,35 @@ REST API for staff authentication, vehicle inventory (with photo uploads), renta
 
 ## Setup
 
-### 1. Create the database
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/NajibHossain49/vehicle-rental-backend.git
+cd vehicle-rental-backend
+```
+
+SSH:
+
+```bash
+git clone git@github.com:NajibHossain49/vehicle-rental-backend.git
+cd vehicle-rental-backend
+```
+
+All later commands run from this project folder.
+
+### 2. Create the database
 
 ```sql
 CREATE DATABASE vehicle_rental;
 ```
 
-### 2. Install dependencies
+### 3. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configure environment
+### 4. Configure environment
 
 Copy `.env.example` to `.env` and fill in the values. The app reads them through `src/config/env.ts` (required variables are validated at startup):
 
@@ -56,7 +72,7 @@ cp .env.example .env
 | `JWT_EXPIRES_IN` | Token lifetime | `1d` |
 | `UPLOAD_PATH` | Local folder for vehicle photos | `./uploads` |
 
-### 4. Run migrations and seeds
+### 5. Run migrations and seeds
 
 ```bash
 npm run migrate:latest
