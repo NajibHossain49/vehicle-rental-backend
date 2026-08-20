@@ -3,24 +3,25 @@ import path from 'path';
 
 dotenv.config();
 
-function readString(name: string, fallback?: string): string {
-  const value = process.env[name]?.trim();
-  if (value) {
-    return value;
+function required(name: string, value: string | undefined): string {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    throw new Error(`Missing required environment variable: ${name}`);
   }
-  if (fallback !== undefined) {
-    return fallback;
-  }
-  throw new Error(`Missing required environment variable: ${name}`);
+  return trimmed;
 }
 
-function readInt(name: string, fallback: number): number {
-  const raw = process.env[name];
-  if (raw === undefined || raw.trim() === '') {
+function optional(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim();
+  return trimmed || fallback;
+}
+
+function optionalInt(name: string, value: string | undefined, fallback: number): number {
+  if (value === undefined || value.trim() === '') {
     return fallback;
   }
 
-  const parsed = Number(raw);
+  const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 0) {
     throw new Error(`Environment variable ${name} must be a non-negative integer`);
   }
@@ -28,28 +29,28 @@ function readInt(name: string, fallback: number): number {
   return parsed;
 }
 
-const poolMin = readInt('DB_POOL_MIN', 2);
-const poolMax = Math.max(poolMin, readInt('DB_POOL_MAX', 10));
+const poolMin = optionalInt('DB_POOL_MIN', process.env.DB_POOL_MIN, 2);
+const poolMax = Math.max(poolMin, optionalInt('DB_POOL_MAX', process.env.DB_POOL_MAX, 10));
 
 export const env = {
-  nodeEnv: readString('NODE_ENV', 'development'),
-  port: readInt('PORT', 3000),
+  nodeEnv: optional(process.env.NODE_ENV, 'development'),
+  port: optionalInt('PORT', process.env.PORT, 3000),
   db: {
-    host: readString('DB_HOST', 'localhost'),
-    port: readInt('DB_PORT', 5432),
-    user: readString('DB_USER'),
-    password: readString('DB_PASSWORD', ''),
-    name: readString('DB_NAME'),
+    host: optional(process.env.DB_HOST, 'localhost'),
+    port: optionalInt('DB_PORT', process.env.DB_PORT, 5432),
+    user: required('DB_USER', process.env.DB_USER),
+    password: optional(process.env.DB_PASSWORD, ''),
+    name: required('DB_NAME', process.env.DB_NAME),
     pool: {
       min: poolMin,
       max: poolMax,
     },
   },
   jwt: {
-    secret: readString('JWT_SECRET'),
-    expiresIn: readString('JWT_EXPIRES_IN', '1d'),
+    secret: required('JWT_SECRET', process.env.JWT_SECRET),
+    expiresIn: optional(process.env.JWT_EXPIRES_IN, '1d'),
   },
-  uploadPath: readString('UPLOAD_PATH', './uploads'),
+  uploadPath: optional(process.env.UPLOAD_PATH, './uploads'),
 } as const;
 
 export const uploadDir = path.resolve(process.cwd(), env.uploadPath);
