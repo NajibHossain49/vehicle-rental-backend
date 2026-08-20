@@ -93,6 +93,29 @@ npm run lint
 
 The API listens on `http://localhost:3000` by default. Uploaded images are served from `/uploads/<filename>`.
 
+## Docker
+
+Needs Docker Engine and a local `.env` (copy from `.env.example`). Compose starts PostgreSQL and the API. `DB_HOST` is set to `db` inside the network, so do not point the container at `localhost`.
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+The API container runs `migrate:latest` on startup, then `node dist/server.js`. Seed is manual:
+
+```bash
+docker compose exec api npm run seed:run
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+To drop the database volume as well: `docker compose down -v`.
+
 ## API Documentation
 
 Full request/response reference, status codes, and examples: **[docs/API.md](./docs/API.md)**.
@@ -207,3 +230,4 @@ This is why the seed includes a rental from **2026-07-28 to 2026-08-03**:
 | [docs/API.md](./docs/API.md) | Complete | Full API reference: auth, vehicles, rentals, reports, errors, overlap, and seed data |
 | [README.md](./README.md) | Complete | Setup, env, migrate/seed, and run instructions |
 | [Postman collection](./Postman_Collection/Vehicle-Rental-API.postman_collection.json) | Ready | Import into Postman; run Login first to save `token` |
+| [Dockerfile](./Dockerfile) / [docker-compose.yml](./docker-compose.yml) | Ready | API + PostgreSQL; `docker compose up --build` |
